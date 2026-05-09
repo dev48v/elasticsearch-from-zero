@@ -1,0 +1,19 @@
+{
+  "name": "elasticsearch-from-zero",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Day 30 of TechFromZero — Recipe Search Engine on Elasticsearch 8 fronting TheMealDB",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "index": "npm run index --workspace=server",
+    "build:server": "npm run build --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "up": "docker compose up -d",
+    "down": "docker compose down -v"
+  }
+}
