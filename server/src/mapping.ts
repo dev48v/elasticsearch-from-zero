@@ -14,9 +14,9 @@
 //   name           → text (analyzed, tokenized, lowercase) — used by `match`
 //   name.keyword   → keyword (exact, case-sensitive)        — used by sort/aggs
 //   name.suggest   → search_as_you_type                     — used by autocomplete
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
-export const recipeMapping: MappingTypeMapping = {
+export const recipeMapping: estypes.MappingTypeMapping = {
   properties: {
     id: { type: 'keyword' },
     name: {
