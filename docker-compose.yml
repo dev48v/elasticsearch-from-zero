@@ -1,0 +1,57 @@
+# STEP 10 — Local development stack.
+#
+#   docker compose up -d              # start ES + API
+#   docker compose run --rm api npm run index   # populate the index
+#   docker compose logs -f api        # watch API logs
+#   docker compose down -v            # stop + wipe volume (start fresh)
+#
+# The `-v` flag on down nukes the named volume — useful when you've changed
+# the index mapping and need to throw away old data.
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: efz-elasticsearch
+    environment:
+      # Single-node = no cluster join discovery, no replicas demanded.
+      - discovery.type=single-node
+      # ES 8 enables xpack security by default. We disable it for local
+      # dev because it requires generating certs and managing a built-in
+      # password — overkill for an isolated docker network.
+      - xpack.security.enabled=false
+      # Pin heap size so ES doesn't grab 50% of host RAM by default.
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - '9200:9200'
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:9200/_cluster/health || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile.dev
+    container_name: efz-api
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - PORT=8080
+    ports:
+      - '8080:8080'
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      # Mount source for fast iteration. tsx watch reloads on save.
+      - ./server/src:/app/server/src
+      - ./server/package.json:/app/server/package.json
+      - ./server/tsconfig.json:/app/server/tsconfig.json
+
+volumes:
+  esdata:

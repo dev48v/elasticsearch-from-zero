@@ -1,0 +1,24 @@
+# Render Blueprint — one web service running ES + Node together.
+# Apply via Render dashboard → New → Blueprint → point at this repo.
+services:
+  - type: web
+    name: elasticsearch-from-zero
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: ELASTICSEARCH_URL
+        value: http://localhost:9200
+      - key: RECIPE_INDEX
+        value: recipes
+      - key: ES_JAVA_OPTS
+        value: -Xms200m -Xmx200m
+      - key: discovery.type
+        value: single-node
+      - key: xpack.security.enabled
+        value: false

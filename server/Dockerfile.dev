@@ -1,0 +1,18 @@
+# Development image — runs `tsx watch` against bind-mounted source.
+# This is NEVER the production image — see Dockerfile at repo root.
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install root + workspace manifests so npm wires up the workspace graph.
+COPY package.json ./
+COPY server/package.json ./server/
+
+# `--workspace=server` only installs the server's deps. Client deps stay
+# absent because we don't run the client in this image.
+RUN npm install --workspace=server
+
+WORKDIR /app/server
+
+EXPOSE 8080
+CMD ["npm", "run", "dev"]
