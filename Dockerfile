@@ -50,9 +50,10 @@ RUN apt-get update \
 
 # Drop in the compiled server.
 WORKDIR /app
+# npm workspaces hoist every dep into /app/node_modules — there is no
+# /app/server/node_modules to copy. Pull the hoisted tree once.
 COPY --from=server-build /app/server/package.json /app/server/package.json
 COPY --from=server-build /app/server/dist /app/server/dist
-COPY --from=server-build /app/server/node_modules /app/server/node_modules
 COPY --from=server-build /app/node_modules /app/node_modules
 COPY package.json /app/package.json
 
