@@ -38,13 +38,15 @@ FROM docker.elastic.co/elasticsearch/elasticsearch:8.13.4
 
 USER root
 
-# Install Node 22 alongside Java. The base image is RHEL UBI9 — yum is
-# available, but rather than pulling Node from the OS repos (which lag
-# years behind) we install via the NodeSource binary tarball.
-RUN curl -fsSL https://rpm.nodesource.com/setup_22.x | bash - \
-  && yum install -y nodejs \
-  && yum clean all \
-  && rm -rf /var/cache/yum
+# Install Node 22 alongside Java. The ES 8 image is Ubuntu-based (since
+# 8.0) so we use apt + the NodeSource Debian setup script. Pinning to
+# Node 22 (current LTS) matches what the build stage compiled against.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl ca-certificates \
+  && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+  && apt-get install -y --no-install-recommends nodejs \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Drop in the compiled server.
 WORKDIR /app

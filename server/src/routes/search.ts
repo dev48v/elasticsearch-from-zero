@@ -203,6 +203,11 @@ searchRouter.get(
     // function_score with random_score is the canonical ES idiom for
     // random sampling. We seed with Date.now() so the same client refresh
     // gets a different random recipe each time.
+    //
+    // The client typings model `function_score.functions` as an array of
+    // function containers. `random_score` is a top-level shorthand the
+    // server accepts but the type lib doesn't expose — we cast to keep
+    // the wire format readable rather than wrap in functions:[{...}].
     const response = await es.search<RecipeSource>({
       index: config.indexName,
       size: 1,
@@ -211,7 +216,7 @@ searchRouter.get(
           query: { match_all: {} },
           random_score: { seed: Date.now(), field: '_seq_no' },
         },
-      },
+      } as Record<string, unknown>,
     });
     const hit = response.hits.hits[0];
     if (!hit) {
